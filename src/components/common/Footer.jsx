@@ -117,24 +117,6 @@ const Footer = () => {
             <ul className="space-y-3">
               <li>
                 <Link
-                  to="/help"
-                  className="flex items-center text-gray-300 hover:text-blue-400 transition-colors"
-                >
-                  <span className="w-1 h-1 bg-gray-400 rounded-full mr-2"></span>{" "}
-                  Help Center
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/safety"
-                  className="flex items-center text-gray-300 hover:text-blue-400 transition-colors"
-                >
-                  <span className="w-1 h-1 bg-gray-400 rounded-full mr-2"></span>{" "}
-                  Safety
-                </Link>
-              </li>
-              <li>
-                <Link
                   to="/terms-and-conditions"
                   className="flex items-center text-gray-300 hover:text-blue-400 transition-colors"
                 >
@@ -198,11 +180,11 @@ const Footer = () => {
 
               <li className="flex items-center">
                 <a
-                  href="mailto:support@sharezy.com"
+                  href="mailto:support@sharezy.in"
                   className="flex items-center hover:text-blue-400 transition-colors"
                 >
                   <FaEnvelope className="mr-2 text-sm" />
-                  <span>support@sharezy.com</span>
+                  <span>support@sharezy.in</span>
                 </a>
               </li>
             </ul>
@@ -215,14 +197,12 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
           <div className="flex items-center mb-4 md:mb-0">
-            <FaShieldAlt className="mr-2" />
-            <span>100% Secure Payments</span>
+            Copyright © {new Date().getFullYear()} Sharezy.
           </div>
           <div className="flex items-center">
-            <FaFileAlt className="mr-2" />
+            {/* <FaFileAlt className="mr-2" /> */}
             <span>
-              &copy; {new Date().getFullYear()} Design & Maintained by{" "}
-              <span>|</span>{" "}
+              Design & Maintained by <span>|</span>{" "}
               <Link to="https://www.ayodhyawebosoft.com/">
                 Ayodhya Webosoft Private Limited
               </Link>
