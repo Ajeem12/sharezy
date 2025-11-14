@@ -25,13 +25,23 @@ const AdminDashboard = () => {
   const { updateResponse } = useSelector((state) => state.commission);
 
   const { users, status: usersStatus } = useSelector((state) => state.users);
-  const { rides, status: ridesStatus } = useSelector((state) => state.totalRides);
-  const { count, status: bookingStatus } = useSelector((state) => state.bookingRides);
-  const { profile, status: profileStatus } = useSelector((state) => state.adminProfile);
-  const { rides: todaybooking, status: todayRidesStatus } = useSelector((state) => state.todayRides);
+  const { rides, status: ridesStatus } = useSelector(
+    (state) => state.totalRides
+  );
+  const { count, status: bookingStatus } = useSelector(
+    (state) => state.bookingRides
+  );
+  const { profile, status: profileStatus } = useSelector(
+    (state) => state.adminProfile
+  );
+  const { rides: todaybooking, status: todayRidesStatus } = useSelector(
+    (state) => state.todayRides
+  );
 
   const [isEditingCommission, setIsEditingCommission] = useState(false);
-  const [commissionValue, setCommissionValue] = useState(profile?.commission ?? 0);
+  const [commissionValue, setCommissionValue] = useState(
+    profile?.commission ?? 0
+  );
 
   useEffect(() => {
     dispatch(fetchUsers());
@@ -72,30 +82,29 @@ const AdminDashboard = () => {
 
   const todayDate = new Date().toISOString().split("T")[0];
 
- // Filter rides by date AND status === 1
-const todaysRides = rides.filter(
-  (ride) => ride.riding_date === todayDate && ride.status === 1
-);
+  // Filter rides by date AND status === 1
+  const todaysRides = rides.filter(
+    (ride) => ride.riding_date === todayDate && ride.status === 1
+  );
 
-const todaysRidesWithName = todaysRides.map((ride) => ({
-  ...ride,
-  user_name: ride.user_details?.name || "N/A",
-}));
+  const todaysRidesWithName = todaysRides.map((ride) => ({
+    ...ride,
+    user_name: ride.user_details?.name || "N/A",
+  }));
 
-// Flatten bookings, then filter by date AND status === 1
-const todaysBookings = todaybooking
-  .flatMap((ride) =>
-    (ride.booked_rides || [])
-      .filter((booking) => booking.status === 1) // Only status 1 bookings
-      .map((booking) => ({
-        ...booking,
-        ride_id: ride.id,
-        source: ride.source,
-        destination: ride.destination,
-      }))
-  )
-  .filter((booking) => booking.booking_date === todayDate);
-
+  // Flatten bookings, then filter by date AND status === 1
+  const todaysBookings = todaybooking
+    .flatMap((ride) =>
+      (ride.booked_rides || [])
+        .filter((booking) => booking.status === 1) // Only status 1 bookings
+        .map((booking) => ({
+          ...booking,
+          ride_id: ride.id,
+          source: ride.source,
+          destination: ride.destination,
+        }))
+    )
+    .filter((booking) => booking.booking_date === todayDate);
 
   return (
     <div className="bg-gray-50 min-h-screen py-2">
@@ -104,9 +113,17 @@ const todaysBookings = todaybooking
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {/* Total Rides */}
-        <StatCard title="Total Rides" value={rides.length} icon={<FiActivity className="text-blue-500" />} />
+        <StatCard
+          title="Total Rides"
+          value={rides.length}
+          icon={<FiActivity className="text-blue-500" />}
+        />
         {/* Users */}
-        <StatCard title="Active Users" value={users.length} icon={<FiUsers className="text-green-500" />} />
+        <StatCard
+          title="Active Users"
+          value={users.length}
+          icon={<FiUsers className="text-green-500" />}
+        />
         {/* Editable Commission */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="flex justify-between items-start">
@@ -120,10 +137,16 @@ const todaysBookings = todaybooking
                     onChange={(e) => setCommissionValue(e.target.value)}
                     className="border px-2 py-1 w-16 text-gray-700 text-sm rounded"
                   />
-                  <button onClick={handleCommissionSubmit} className="text-green-600">
+                  <button
+                    onClick={handleCommissionSubmit}
+                    className="text-green-600"
+                  >
                     <FiCheck />
                   </button>
-                  <button onClick={() => setIsEditingCommission(false)} className="text-red-500">
+                  <button
+                    onClick={() => setIsEditingCommission(false)}
+                    className="text-red-500"
+                  >
                     <FiX />
                   </button>
                 </div>
@@ -143,7 +166,11 @@ const todaysBookings = todaybooking
           </div>
         </div>
         {/* New Bookings */}
-        <StatCard title="New Bookings" value={count} icon={<FiCalendar className="text-orange-500" />} />
+        <StatCard
+          title="New Bookings"
+          value={count}
+          icon={<FiCalendar className="text-orange-500" />}
+        />
       </div>
 
       {/* Today's Rides and Bookings */}
@@ -176,7 +203,17 @@ const RideTable = ({ rides }) => (
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <TableHeader titles={["Ride ID", "Name", "Source", "Destination", "Date", "Seats", "₹/Seat"]} />
+            <TableHeader
+              titles={[
+                "Ride ID",
+                "Name",
+                "Source",
+                "Destination",
+                "Date",
+                "Seats",
+                "₹/Seat",
+              ]}
+            />
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -185,18 +222,31 @@ const RideTable = ({ rides }) => (
               <tr key={ride.id}>
                 <td className="px-4 py-2 text-sm text-gray-900">{ride.id}</td>
                 <td className="px-4 py-2 text-sm text-blue-700">
-                  <Link to={`/admin/user/${ride.user_id}`}>{ride.user_name}</Link>
+                  <Link to={`/admin/user/${ride.user_id}`}>
+                    {ride.user_name}
+                  </Link>
                 </td>
-                <td className="px-4 py-2 text-sm text-gray-600">{ride.source}</td>
-                <td className="px-4 py-2 text-sm text-gray-600">{ride.destination}</td>
-                <td className="px-4 py-2 text-sm text-gray-600">{ride.riding_date}</td>
+                <td className="px-4 py-2 text-sm text-gray-600">
+                  {ride.source}
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-600">
+                  {ride.destination}
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-600">
+                  {ride.riding_date}
+                </td>
                 <td className="px-4 py-2 text-sm text-gray-600">{ride.seat}</td>
-                <td className="px-4 py-2 text-sm text-gray-600">₹{ride.price}</td>
+                <td className="px-4 py-2 text-sm text-gray-600">
+                  ₹{ride.price}
+                </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="7" className="px-4 py-4 text-center text-sm text-gray-500">
+              <td
+                colSpan="7"
+                className="px-4 py-4 text-center text-sm text-gray-500"
+              >
                 No rides today.
               </td>
             </tr>
@@ -215,28 +265,50 @@ const BookingTable = ({ bookings }) => (
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <TableHeader titles={["Booking ID", "Name", "Ride ID", "Seats", "Booking Date", "Price"]} />
+            <TableHeader
+              titles={[
+                "Booking ID",
+                "Name",
+                "Ride ID",
+                "Seats",
+                "Booking Date",
+                "Price",
+              ]}
+            />
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {bookings.length > 0 ? (
             bookings.map((booking) => (
               <tr key={booking.id}>
-                <td className="px-4 py-2 text-sm text-gray-900">{booking.id}</td>
+                <td className="px-4 py-2 text-sm text-gray-900">
+                  {booking.id}
+                </td>
                 <td className="px-4 py-2 text-sm text-blue-600">
                   <Link to={`/admin/user/${booking.booked_user_details?.id}`}>
                     {booking.booked_user_details?.name || "N/A"}
                   </Link>
                 </td>
-                <td className="px-4 py-2 text-sm text-gray-600">{booking.ride_id}</td>
-                <td className="px-4 py-2 text-sm text-gray-600">{booking.seat}</td>
-                <td className="px-4 py-2 text-sm text-gray-600">{booking.booking_date}</td>
-                <td className="px-4 py-2 text-sm text-gray-600">₹{booking.price}</td>
+                <td className="px-4 py-2 text-sm text-gray-600">
+                  {booking.ride_id}
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-600">
+                  {booking.seat}
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-600">
+                  {booking.booking_date}
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-600">
+                  ₹{booking.price}
+                </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="6" className="px-4 py-4 text-center text-sm text-gray-500">
+              <td
+                colSpan="6"
+                className="px-4 py-4 text-center text-sm text-gray-500"
+              >
                 No bookings today.
               </td>
             </tr>

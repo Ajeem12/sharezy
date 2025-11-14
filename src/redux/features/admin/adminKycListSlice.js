@@ -83,6 +83,7 @@ const adminKycListSlice = createSlice({
       }
     },
   },
+
   extraReducers: (builder) => {
     builder
       .addCase(fetchAdmins.pending, (state) => {
@@ -130,5 +131,4 @@ const adminKycListSlice = createSlice({
 
 export const { resetAdminState, clearCurrentKyc, updateKycStatusLocally } =
   adminKycListSlice.actions;
-
 export default adminKycListSlice.reducer;

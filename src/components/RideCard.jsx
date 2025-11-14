@@ -196,7 +196,10 @@ const RideListing = ({ ridesData = [], filterOptions = {}, updateFilters }) => {
                     <FaClock className="text-gray-400" />
                     <span>
                       <strong>Departure:</strong>{" "}
-                      {new Date(ride.riding_time).toLocaleString()}
+                      {new Date(ride.riding_time).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -240,15 +243,16 @@ const RideListing = ({ ridesData = [], filterOptions = {}, updateFilters }) => {
               </div>
 
               {/* Book Button */}
-              {String(ride.user_id) !== localStorage.getItem("login") && (
-                <button
-                  onClick={() => navigate(`/details/${ride.id}`)}
-                  className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2"
-                >
-                  <FaMoneyBillWave />
-                  Book this ride
-                </button>
-              )}
+              {String(ride.user_id) !== localStorage.getItem("login") &&
+                Number(ride.seat) - Number(ride.booked_rides_count) > 0 && (
+                  <button
+                    onClick={() => navigate(`/details/${ride.id}`)}
+                    className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2"
+                  >
+                    <FaMoneyBillWave />
+                    Book this ride
+                  </button>
+                )}
             </div>
           ))}
         </div>

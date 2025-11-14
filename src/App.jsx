@@ -14,7 +14,7 @@ import ProfileContent from "./pages/profile/ProfileContent";
 import Setting from "./pages/profile/Setting";
 import MyRides from "./pages/profile/MyRides";
 import UserBookingsCards from "./pages/profile/Booking";
-import PaymentSuccess from "./components/PaymentSuccess";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminLayout from "./layouts/AdminLayout";
 import UserManagement from "./pages/admin/UserManagement";
@@ -46,6 +46,7 @@ import TermsNConditions from "./pages/TermsNConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import RefundPolicy from "./pages/RefundPolicy";
 import Contact from "./pages/Contact";
+import About from "./pages/About";
 
 const router = createBrowserRouter([
   {
@@ -83,6 +84,10 @@ const router = createBrowserRouter([
         element: <Contact />,
       },
       {
+        path: "/about",
+        element: <About />,
+      },
+      {
         path: "/publish",
         element: (
           <PrivateRoute>
@@ -91,7 +96,7 @@ const router = createBrowserRouter([
         ),
       },
       { path: "/loader", element: <SharezyLoader /> },
-      { path: "/success", element: <PaymentSuccess /> },
+      { path: "/thank-you/:id", element: <PaymentSuccess /> },
       // In your router configuration
       {
         path: "dashboard",

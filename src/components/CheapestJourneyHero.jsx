@@ -6,8 +6,14 @@ import {
   FaArrowRight,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const CheapestJourneyHero = () => {
+  const navigate = useNavigate();
+
+  const handleNavigate = () => {
+    navigate("/publish");
+  };
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -109,6 +115,7 @@ const CheapestJourneyHero = () => {
           <motion.button
             className="group bg-blue-500 hover:to-blue-800 text-white text-lg font-semibold px-8 py-4 rounded-lg shadow-lg transition-all duration-300 flex items-center gap-2"
             variants={itemVariants}
+            onClick={handleNavigate}
             whileHover={{
               scale: 1.02,
               boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.4)",

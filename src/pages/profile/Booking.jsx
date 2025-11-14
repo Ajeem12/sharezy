@@ -110,25 +110,31 @@ const MyBookings = () => {
     });
   };
   // Ensure bookings are sorted from latest to oldest
-// const sortedBookings = [...(bookings || [])].sort((a, b) => {
-//   const timeA = new Date(a.my_ride_details.riding_time);
-//   const timeB = new Date(b.my_ride_details.riding_time);
-//   return timeB - timeA; // Most recent first
-// });
+  // const sortedBookings = [...(bookings || [])].sort((a, b) => {
+  //   const timeA = new Date(a.my_ride_details.riding_time);
+  //   const timeB = new Date(b.my_ride_details.riding_time);
+  //   return timeB - timeA; // Most recent first
+  // });
 
-// const sortedBookings = [...(bookings || [])].sort((a, b) => {
-//   const timeA = new Date(a.my_ride_details.riding_time);
-//   const timeB = new Date(b.my_ride_details.riding_time);
-//   return timeA - timeB; // Oldest first
-// });
-const sortedBookings = [...(bookings || [])].sort((a, b) => b.id - a.id); // Newest bookings first
-
+  // const sortedBookings = [...(bookings || [])].sort((a, b) => {
+  //   const timeA = new Date(a.my_ride_details.riding_time);
+  //   const timeB = new Date(b.my_ride_details.riding_time);
+  //   return timeA - timeB; // Oldest first
+  // });
+  const sortedBookings = [...(bookings || [])].sort((a, b) => b.id - a.id);
 
   const filteredBookings =
-  sortedBookings.filter((booking) =>
-    activeTab === "all" ? booking.status === 1 : booking.status === 0
-  ) || [];
+    sortedBookings.filter((booking) =>
+      activeTab === "all"
+        ? booking.booking_status === 1
+        : booking.booking_status === 2
+    ) || [];
 
+  // Before return
+  const activeBookings = sortedBookings.filter((b) => b.booking_status === 1);
+  const cancelledBookings = sortedBookings.filter(
+    (b) => b.booking_status === 2
+  );
 
   if (status === "loading") {
     return <SharezyLoader />;
@@ -151,14 +157,13 @@ const sortedBookings = [...(bookings || [])].sort((a, b) => b.id - a.id); // New
     );
   }
   const isBookingCancellable = (ridingDate, ridingTime) => {
-  const timePart = ridingTime.split(" ")[1]; // Extract just the HH:mm:ss from ridingTime
-  const rideDateTime = new Date(`${ridingDate}T${timePart}`);
-  const now = new Date();
-  const timeDifference = rideDateTime - now;
+    const timePart = ridingTime.split(" ")[1]; // Extract just the HH:mm:ss from ridingTime
+    const rideDateTime = new Date(`${ridingDate}T${timePart}`);
+    const now = new Date();
+    const timeDifference = rideDateTime - now;
 
-  return timeDifference > 2 * 60 * 60 * 1000; // More than 2 hours
-};
-
+    return timeDifference > 2 * 60 * 60 * 1000; // More than 2 hours
+  };
 
   return (
     <div className="max-w-6xl mx-auto p-1.5  lg:p-8">
@@ -176,7 +181,7 @@ const sortedBookings = [...(bookings || [])].sort((a, b) => b.id - a.id); // New
       </div>
 
       {/* Tabs */}
-      <div className="flex overflow-x-auto pb-2 mb-6 scrollbar-hide">
+      {/* <div className="flex overflow-x-auto pb-2 mb-6 scrollbar-hide">
         {["all", "cancelled"].map((tab) => (
           <button
             key={tab}
@@ -189,6 +194,24 @@ const sortedBookings = [...(bookings || [])].sort((a, b) => b.id - a.id); // New
           >
             {tab === "all" ? "All Rides" : "Cancelled"} (
             {filteredBookings.length})
+          </button>
+        ))}
+      </div> */}
+
+      <div className="flex overflow-x-auto pb-2 mb-6 scrollbar-hide">
+        {["all", "cancelled"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2.5 font-medium text-sm whitespace-nowrap mr-2 rounded-lg ${
+              activeTab === tab
+                ? "bg-blue-600 text-white shadow-sm"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            {tab === "all"
+              ? `All Rides (${activeBookings.length})`
+              : `Cancelled (${cancelledBookings.length})`}
           </button>
         ))}
       </div>
@@ -273,8 +296,6 @@ const sortedBookings = [...(bookings || [])].sort((a, b) => b.id - a.id); // New
                             </span>
                           </div>
                           <div className="flex items-center gap-2 text-sm">
-                           
-                           
                             <span>₹{booking.price}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm">
@@ -410,9 +431,9 @@ const sortedBookings = [...(bookings || [])].sort((a, b) => b.id - a.id); // New
                                     >
                                       Cancel Booking
                                     </button>
-                                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+                                    {/* <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
                                       Contact Driver
-                                    </button>
+                                    </button> */}
                                   </>
                                 ) : (
                                   <div className="w-full bg-yellow-50 p-3 rounded-lg text-yellow-800 text-sm font-medium">

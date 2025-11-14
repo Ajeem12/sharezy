@@ -1,34 +1,44 @@
-import { FaCar, FaMapMarkerAlt, FaCalendarAlt, FaUser, FaStar, FaExchangeAlt, FaSearch } from 'react-icons/fa';
-import { motion } from 'framer-motion';
+import {
+  FaCar,
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+  FaUser,
+  FaStar,
+  FaExchangeAlt,
+  FaSearch,
+} from "react-icons/fa";
+import { motion } from "framer-motion";
 const HowItWorks = () => {
   const steps = [
     {
       icon: <FaMapMarkerAlt className="text-3xl text-blue-500" />,
       title: "Set Your Route",
-      description: "Enter your pickup and drop-off locations"
+      description: "Enter your pickup and drop-off locations",
     },
     {
       icon: <FaCar className="text-3xl text-blue-500" />,
       title: "Choose Your Ride",
-      description: "Select from available vehicles and drivers"
+      description: "Select from available vehicles and riders",
     },
     {
       icon: <FaUser className="text-3xl text-blue-500" />,
-      title: "Meet Your Driver",
-      description: "Get matched with verified community drivers"
+      title: "Meet Your Rider",
+      description: "Get matched with verified community riders",
     },
     {
       icon: <FaStar className="text-3xl text-blue-500" />,
       title: "Enjoy Your Ride",
-      description: "Travel comfortably with trusted companions"
-    }
+      description: "Travel comfortably with trusted companions",
+    },
   ];
 
   return (
     <section className="py-6  bg-white">
       <div className="container mx-auto p-2">
         <div className="text-center mb-6">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">How Sharezy Works</h2>
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            How Sharezy Works
+          </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Get where you need to go in just a few simple steps
           </p>

@@ -17,14 +17,16 @@ import userWisePublishRidesReducer from "./features/admin/userWisePublishRidesSl
 import reportReducer from "./features/reportSlice";
 import userStatusReducer from "./features/admin/userStatusSlice";
 import bookingRidesReducer from "./features/admin/bookingRidesSlice";
-import supportReducer from './features/admin/supportSlice';
-import mostVisitedReducer from './features/mostVisitedSlice';
-import commissionReducer from './features/admin/commissionSlice';
-import adminProfileReducer from './features/admin/adminProfileSlice';
-import todayRidesReducer from './features/admin/todayRidesSlice';
-import kycReducer from './features/profile/kycSlice';
+import supportReducer from "./features/admin/supportSlice";
+import mostVisitedReducer from "./features/mostVisitedSlice";
+import commissionReducer from "./features/admin/commissionSlice";
+import adminProfileReducer from "./features/admin/adminProfileSlice";
+import todayRidesReducer from "./features/admin/todayRidesSlice";
+import kycReducer from "./features/profile/kycSlice";
 import adminKycListReducer from "./features/admin/adminKycListSlice";
 import kycStatusReducer from "./features/admin/kycStatusSlice";
+import paymentStatusReducer from "./features/paymentStatusSlice";
+import walletReducer from "./features/profile/walletSlice";
 
 const store = configureStore({
   reducer: {
@@ -52,10 +54,9 @@ const store = configureStore({
     todayRides: todayRidesReducer,
     kyc: kycReducer,
     adminKycListSlice: adminKycListReducer,
-    kycStatusSlice:kycStatusReducer
-
-    
-
+    kycStatusSlice: kycStatusReducer,
+    paymentStatus: paymentStatusReducer,
+    wallet: walletReducer,
   },
 });
 

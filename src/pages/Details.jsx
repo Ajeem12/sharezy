@@ -36,22 +36,21 @@ const ride_Details = () => {
     (state) => state.rideBooking
   );
 
-  const { rideId } = useParams(); // Get rideId from the URL
+  const { rideId } = useParams();
 
   useEffect(() => {
     console.log("useEffect triggered");
     // if (rideId) {
     console.log("Dispatching action with rideId:", rideId);
-    dispatch(getRideDetails(rideId)); // Dispatch the action to get ride details
+    dispatch(getRideDetails(rideId));
     // }
   }, [dispatch, rideId]);
 
-  const [selectedSeats, setSelectedSeats] = useState(1); // Default selected seats to 1
-  const [totalPrice, setTotalPrice] = useState(rideDetails?.price || 0); // Calculate total price based on sele
-
+  const [selectedSeats, setSelectedSeats] = useState(1);
+  const [totalPrice, setTotalPrice] = useState(rideDetails?.price || 0);
   useEffect(() => {
     if (rideDetails && selectedSeats) {
-      setTotalPrice(rideDetails.price * selectedSeats); // Total price based on selected seats
+      setTotalPrice(rideDetails.price * selectedSeats);
     }
   }, [selectedSeats, rideDetails]);
 
@@ -65,15 +64,12 @@ const ride_Details = () => {
     rideDetails?.seat - (rideDetails?.booked_rides_count || 0)
   );
 
-  // Handle booking
-  // Handle booking
   const handleBooking = () => {
     const storedUser = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
 
     if (!storedUser || !storedToken) {
-      // Not logged in
-      navigate("/login"); // Redirect to login
+      navigate("/login");
       return;
     }
 
@@ -94,9 +90,41 @@ const ride_Details = () => {
       )
         .unwrap()
         .then((res) => {
-          toast.success("Booking successful!");
-           navigate("/success");
-          dispatch(getRideDetails(rideId)); // Refetch ride details after successful booking
+          if (res?.ride?.id) {
+            const bookingId = res.ride.id;
+            const paymentUrl = `https://sharezy.in/backend/public/api/pay/${bookingId}`;
+
+            // 💬 Show user feedback before redirect
+            toast.loading("Redirecting to payment gateway... Please wait", {
+              id: "paymentRedirect",
+            });
+
+            // Small delay to let user see toast
+            setTimeout(() => {
+              const formData = new FormData();
+              formData.append("amount", totalPrice);
+
+              const form = document.createElement("form");
+              form.method = "POST";
+              form.action = paymentUrl;
+
+              // Append form data as hidden inputs
+              for (const [key, value] of formData.entries()) {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = key;
+                input.value = value;
+                form.appendChild(input);
+              }
+
+              document.body.appendChild(form);
+              form.submit();
+            }, 1500); // 1.5s delay for smooth UX
+          } else {
+            toast.error("Payment initiation failed. Missing booking ID.");
+          }
+
+          dispatch(getRideDetails(rideId));
         })
         .catch((err) => {
           toast.error("Booking failed. Please try again.");

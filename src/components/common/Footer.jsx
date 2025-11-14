@@ -25,11 +25,16 @@ const Footer = () => {
               <span className="text-2xl font-bold text-blue-400">Sharezy</span>
             </Link>
             <p className="text-gray-300 text-sm leading-relaxed">
-              Reliable rides at your fingertips. Anytime. Anywhere. Join
-              thousands of satisfied customers today.
+              At Sharezy, we make travel more affordable, social, and
+              eco-friendly by connecting drivers with empty seats to passengers
+              going the same way — helping people share rides, save money, and
+              reduce carbon footprints.
+              <span className="ml-1 text-gray-400 font-semibold">
+                a platform owned by Dinesh Chouhan.
+              </span>
             </p>
 
-            <div className="flex space-x-4 pt-2">
+            {/* <div className="flex space-x-4 pt-2">
               <Link
                 to="#"
                 className="bg-gray-700 hover:bg-blue-500 p-2 rounded-full transition-colors"
@@ -60,7 +65,7 @@ const Footer = () => {
               >
                 <FaYoutube className="text-white text-sm" />
               </Link>
-            </div>
+            </div> */}
           </div>
 
           {/* Quick Links */}
@@ -103,7 +108,7 @@ const Footer = () => {
                   className="flex items-center text-gray-300 hover:text-blue-400 transition-colors"
                 >
                   <span className="w-1 h-1 bg-gray-400 rounded-full mr-2"></span>{" "}
-                  Become a Driver
+                  Register
                 </Link>
               </li>
             </ul>
@@ -112,7 +117,7 @@ const Footer = () => {
           {/* Support */}
           <div>
             <h3 className="text-lg font-semibold text-blue-300 mb-4 flex items-center">
-              <FaQuestionCircle className="mr-2" /> Support
+              <FaQuestionCircle className="mr-2" /> Useful Links
             </h3>
             <ul className="space-y-3">
               <li>
@@ -149,6 +154,15 @@ const Footer = () => {
                 >
                   <span className="w-1 h-1 bg-gray-400 rounded-full mr-2"></span>{" "}
                   Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/about"
+                  className="flex items-center text-gray-300 hover:text-blue-400 transition-colors"
+                >
+                  <span className="w-1 h-1 bg-gray-400 rounded-full mr-2"></span>{" "}
+                  About Us
                 </Link>
               </li>
             </ul>
@@ -190,7 +204,6 @@ const Footer = () => {
             </ul>
           </div>
         </div>
-
         {/* Divider */}
         <div className="border-t border-gray-800 mt-10 mb-6"></div>
 
