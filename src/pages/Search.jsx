@@ -20,14 +20,16 @@ const Search = () => {
       <div className="max-w-7xl mx-auto">
         {loading ? (
           // Loader Spinner
-           <div className="fixed inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center z-30">
-                    <SharezyLoader />
-                  </div>
+          <div className="fixed inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center z-30">
+            <SharezyLoader />
+          </div>
         ) : (
           <>
             {/* Heading */}
             <div className="text-center mb-10">
-              <h1 className="text-3xl font-bold text-blue-500 mb-2">Find a Ride</h1>
+              <h1 className="text-3xl font-bold text-blue-500 mb-2">
+                Find a Ride
+              </h1>
               <p className="text-gray-600 text-sm">
                 Enter your details to search available carpooling options
               </p>
@@ -43,6 +45,10 @@ const Search = () => {
           </>
         )}
       </div>
+      <br />
+      <br />
+      <br />
+      <br />
     </div>
   );
 };

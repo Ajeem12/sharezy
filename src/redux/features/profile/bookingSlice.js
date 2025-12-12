@@ -9,7 +9,7 @@ export const fetchBookings = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosClient.get(`${apiUrl}/my_booked_rides`); // ⬅️ Changed to GET
-      return response.data; // Expected to be an array of bookings
+      return response.data;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Fetching bookings failed"
@@ -77,7 +77,7 @@ const bookingSlice = createSlice({
           (b) => b.id === bookingId
         );
         if (bookingIndex !== -1) {
-          state.bookings[bookingIndex].status = status; 
+          state.bookings[bookingIndex].status = status;
           state.bookings[bookingIndex].cancel_reason = reason;
         }
       })

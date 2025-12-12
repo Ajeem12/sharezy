@@ -3,9 +3,7 @@ import { useSelector } from "react-redux";
 import PublishForm from "../components/PublishForm";
 import SharezyLoader from "../components/SharezyLoader";
 
-
 const Publish = () => {
-  
   const { loading } = useSelector((state) => state.publishForm);
   const [initialLoading, setInitialLoading] = useState(true);
 
@@ -25,9 +23,11 @@ const Publish = () => {
       ) : (
         <PublishForm />
       )}
+      <br />
+      <br />
+      <br />
     </div>
   );
 };
-
 
 export default Publish;

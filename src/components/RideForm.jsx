@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -60,7 +59,9 @@ const RideForm = () => {
   // FROM handlers
   const handleFromChange = (event, newValue) => {
     if (newValue) {
-      dispatch(setFrom({ value: newValue, label: newValue.city_name || newValue }));
+      dispatch(
+        setFrom({ value: newValue, label: newValue.city_name || newValue })
+      );
       setFromInput(newValue.city_name || newValue);
     } else {
       dispatch(setFrom(null));
@@ -90,7 +91,9 @@ const RideForm = () => {
   // TO handlers
   const handleToChange = (event, newValue) => {
     if (newValue) {
-      dispatch(setTo({ value: newValue, label: newValue.city_name || newValue }));
+      dispatch(
+        setTo({ value: newValue, label: newValue.city_name || newValue })
+      );
       setToInput(newValue.city_name || newValue);
     } else {
       dispatch(setTo(null));
@@ -143,7 +146,9 @@ const RideForm = () => {
       formData.from.label.toLowerCase() === formData.to.label.toLowerCase()
     ) {
       toast.error(
-        formData.from && formData.to && formData.from.label.toLowerCase() === formData.to.label.toLowerCase()
+        formData.from &&
+          formData.to &&
+          formData.from.label.toLowerCase() === formData.to.label.toLowerCase()
           ? "From and To cannot be the same city"
           : "Please select From, To locations and Date"
       );
@@ -158,7 +163,8 @@ const RideForm = () => {
     };
 
     // Save to localStorage recent searches
-    const searchHistory = JSON.parse(localStorage.getItem("recentSearches")) || [];
+    const searchHistory =
+      JSON.parse(localStorage.getItem("recentSearches")) || [];
     const newSearch = {
       from: payload.source,
       to: payload.destination,
@@ -317,8 +323,6 @@ const RideForm = () => {
 };
 
 export default RideForm;
-
-
 
 // import React, { useEffect } from "react";
 // import { useNavigate, useLocation } from "react-router-dom";

@@ -151,6 +151,10 @@ const RideListingPage = () => {
         </div>
       </div>
       <PopularRides />
+      <br />
+      <br />
+      <br />
+      <br />
     </div>
   );
 };

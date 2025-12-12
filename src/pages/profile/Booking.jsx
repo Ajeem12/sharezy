@@ -37,6 +37,7 @@ const MyBookings = () => {
 
   const dispatch = useDispatch();
   const { bookings, status, error } = useSelector((state) => state.booking);
+
   const {
     loading: reportLoading,
     success: reportSuccess,
@@ -109,19 +110,9 @@ const MyBookings = () => {
       hour12: true,
     });
   };
-  // Ensure bookings are sorted from latest to oldest
-  // const sortedBookings = [...(bookings || [])].sort((a, b) => {
-  //   const timeA = new Date(a.my_ride_details.riding_time);
-  //   const timeB = new Date(b.my_ride_details.riding_time);
-  //   return timeB - timeA; // Most recent first
-  // });
 
-  // const sortedBookings = [...(bookings || [])].sort((a, b) => {
-  //   const timeA = new Date(a.my_ride_details.riding_time);
-  //   const timeB = new Date(b.my_ride_details.riding_time);
-  //   return timeA - timeB; // Oldest first
-  // });
   const sortedBookings = [...(bookings || [])].sort((a, b) => b.id - a.id);
+  console.log("sortedBookings", sortedBookings);
 
   const filteredBookings =
     sortedBookings.filter((booking) =>
@@ -131,7 +122,10 @@ const MyBookings = () => {
     ) || [];
 
   // Before return
+
   const activeBookings = sortedBookings.filter((b) => b.booking_status === 1);
+  console.log("activeBookings", activeBookings);
+
   const cancelledBookings = sortedBookings.filter(
     (b) => b.booking_status === 2
   );
@@ -166,7 +160,7 @@ const MyBookings = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-1.5  lg:p-8">
+    <div className="max-w-6xl mx-auto p-1.5  lg:p-8 mb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
@@ -235,7 +229,7 @@ const MyBookings = () => {
               const ride = booking.my_ride_details;
               const driver = ride?.user_details;
               const isExpanded = expandedBooking === booking.id;
-              const isCancelled = booking.status === 0;
+              const isCancelled = booking.booking_status === 2;
 
               return (
                 <motion.div

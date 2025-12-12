@@ -6,81 +6,34 @@ import {
   updateKyc,
 } from "../../redux/features/profile/kycSlice";
 
+const initialForm = {
+  aadhar_no: "",
+  pancard_no: "",
+  bank_acc_no: "",
+  bank_acc_name: "",
+  ifsc_code: "",
+  upload_aadhar: null,
+  upload_pancard: null,
+  upload_photo: null,
+};
+
 const Kyc = () => {
   const dispatch = useDispatch();
-  const {
-    data: kycData,
-    loading,
-    error,
-    success,
-  } = useSelector((state) => state.kyc);
+  const { data: kycData, loading, error, success } = useSelector((s) => s.kyc);
   const imageUrl = import.meta.env.VITE_IMAGE_BASE_URL;
 
+  const [form, setForm] = useState(initialForm);
   const [editMode, setEditMode] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const aadharRef = useRef(null);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
-
-  const [formData, setFormData] = useState({
-    aadhar_no: "",
-    pancard_no: "",
-    bank_acc_no: "",
-    bank_acc_name: "",
-    ifsc_code: "",
+  const [previews, setPreviews] = useState({
     upload_aadhar: null,
     upload_pancard: null,
     upload_photo: null,
   });
-
-  // Validation rules
-  const validateField = (name, value) => {
-    switch (name) {
-      case "aadhar_no":
-        if (!value) return "Aadhar number is required";
-        if (!/^\d{12}$/.test(value)) return "Aadhar must be 12 digits";
-        return "";
-      case "pancard_no":
-        if (!value) return "PAN number is required";
-        if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(value))
-          return "Invalid PAN format (e.g., ABCDE1234F)";
-        return "";
-      case "bank_acc_no":
-        if (!value) return "Account number is required";
-        if (!/^\d{9,18}$/.test(value))
-          return "Account number must be 9-18 digits";
-        return "";
-      case "bank_acc_name":
-        if (!value) return "Account holder name is required";
-        if (value.length < 3) return "Name too short";
-        return "";
-      case "ifsc_code":
-        if (!value) return "IFSC code is required";
-        if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(value))
-          return "Invalid IFSC format (e.g., ABCD0123456)";
-        return "";
-      case "upload_aadhar":
-        if (!editMode && !value && !kycData?.upload_aadhar)
-          return "Aadhar card is required";
-        if (value && !value.type.match("image.*"))
-          return "Only image files are allowed";
-        return "";
-      case "upload_pancard":
-        if (!editMode && !value && !kycData?.upload_pancard)
-          return "PAN card is required";
-        if (value && !value.type.match("image.*"))
-          return "Only image files are allowed";
-        return "";
-      case "upload_photo":
-        if (!editMode && !value && !kycData?.upload_photo)
-          return "Photo is required";
-        if (value && !value.type.match("image.*"))
-          return "Only image files are allowed";
-        return "";
-      default:
-        return "";
-    }
-  };
+  const [apiResponse, setApiResponse] = useState(null);
+  const aadharRef = useRef(null);
 
   useEffect(() => {
     dispatch(fetchKyc());
@@ -88,7 +41,7 @@ const Kyc = () => {
 
   useEffect(() => {
     if (kycData?.id) {
-      setFormData({
+      setForm({
         aadhar_no: kycData.aadhar_no || "",
         pancard_no: kycData.pancard_no || "",
         bank_acc_no: kycData.bank_acc_no || "",
@@ -98,112 +51,159 @@ const Kyc = () => {
         upload_pancard: null,
         upload_photo: null,
       });
-      setShowForm(true);
-    }
-  }, [kycData]);
-
-  useEffect(() => {
-    if (editMode && aadharRef.current) {
-      aadharRef.current.focus();
-    }
-  }, [editMode]);
-
-  // Initialize form for new KYC when showForm is true
-  useEffect(() => {
-    if (showForm && !kycData?.id) {
-      setFormData({
-        aadhar_no: "",
-        pancard_no: "",
-        bank_acc_no: "",
-        bank_acc_name: "",
-        ifsc_code: "",
+      setPreviews({
         upload_aadhar: null,
         upload_pancard: null,
         upload_photo: null,
       });
+      setShowForm(true);
+      setEditMode(false);
+    } else if (!kycData?.id && showForm) {
+      // new KYC
+      setForm(initialForm);
       setEditMode(true);
     }
-  }, [showForm, kycData]);
+  }, [kycData, showForm]);
 
-  const handleInputChange = (e) => {
+  useEffect(() => {
+    return () => {
+      // revoke object URLs
+      Object.values(previews).forEach((p) => p && URL.revokeObjectURL(p));
+    };
+  }, [previews]);
+
+  useEffect(() => {
+    if (editMode && aadharRef.current) aadharRef.current.focus();
+  }, [editMode]);
+
+  const validators = {
+    aadhar_no: (v) =>
+      !v
+        ? "Aadhar number is required"
+        : !/^\d{12}$/.test(v)
+        ? "Aadhar must be 12 digits"
+        : "",
+    pancard_no: (v) =>
+      !v
+        ? "PAN number is required"
+        : !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(v)
+        ? "Invalid PAN format (e.g., ABCDE1234F)"
+        : "",
+    bank_acc_no: (v) =>
+      !v
+        ? "Account number is required"
+        : !/^\d{9,18}$/.test(v)
+        ? "Account number must be 9-18 digits"
+        : "",
+    bank_acc_name: (v) =>
+      !v
+        ? "Account holder name is required"
+        : v.length < 3
+        ? "Name too short"
+        : "",
+    ifsc_code: (v) =>
+      !v
+        ? "IFSC code is required"
+        : !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(v)
+        ? "Invalid IFSC format (e.g., ABCD0123456)"
+        : "",
+    upload_aadhar: (f) => {
+      if (!editMode && !f && !kycData?.upload_aadhar)
+        return "Aadhar card is required";
+      if (f && !f.type.match("image.*")) return "Only image files are allowed";
+      return "";
+    },
+    upload_pancard: (f) => {
+      if (!editMode && !f && !kycData?.upload_pancard)
+        return "PAN card is required";
+      if (f && !f.type.match("image.*")) return "Only image files are allowed";
+      return "";
+    },
+    upload_photo: (f) => {
+      if (!editMode && !f && !kycData?.upload_photo) return "Photo is required";
+      if (f && !f.type.match("image.*")) return "Only image files are allowed";
+      return "";
+    },
+  };
+
+  const validateField = (name, value) => {
+    const fn = validators[name];
+    return fn ? fn(value) : "";
+  };
+
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
-    if (touched[name]) {
-      setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
-    }
+    setForm((p) => ({ ...p, [name]: value }));
+    if (touched[name])
+      setErrors((p) => ({ ...p, [name]: validateField(name, value) }));
   };
 
   const handleBlur = (e) => {
     const { name, value } = e.target;
-    setTouched((prev) => ({ ...prev, [name]: true }));
-    setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
+    setTouched((p) => ({ ...p, [name]: true }));
+    setErrors((p) => ({ ...p, [name]: validateField(name, value) }));
   };
 
-  const handleFileChange = (e) => {
+  const handleFile = (e) => {
     const { name, files } = e.target;
-    const file = files[0];
-    setFormData((prev) => ({ ...prev, [name]: file }));
-
-    if (touched[name]) {
-      setErrors((prev) => ({ ...prev, [name]: validateField(name, file) }));
-    }
+    const file = files?.[0] || null;
+    // revoke previous
+    if (previews[name]) URL.revokeObjectURL(previews[name]);
+    setForm((p) => ({ ...p, [name]: file }));
+    setPreviews((p) => ({
+      ...p,
+      [name]: file ? URL.createObjectURL(file) : null,
+    }));
+    if (touched[name])
+      setErrors((p) => ({ ...p, [name]: validateField(name, file) }));
   };
 
   const validateForm = () => {
-    const newErrors = {};
-    let isValid = true;
-
-    Object.keys(formData).forEach((key) => {
-      const error = validateField(key, formData[key]);
-      newErrors[key] = error;
-      if (error) isValid = false;
+    const newErr = {};
+    let ok = true;
+    Object.keys(form).forEach((k) => {
+      const err = validateField(k, form[k]);
+      if (err) ok = false;
+      newErr[k] = err;
     });
-
-    setErrors(newErrors);
-    setTouched(
-      Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {})
-    );
-    return isValid;
+    setErrors(newErr);
+    setTouched(Object.keys(form).reduce((a, k) => ({ ...a, [k]: true }), {}));
+    return ok;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    const formPayload = new FormData();
-    formPayload.append("aadhar_no", formData.aadhar_no);
-    formPayload.append("pancard_no", formData.pancard_no);
-    formPayload.append("bank_acc_no", formData.bank_acc_no);
-    formPayload.append("bank_acc_name", formData.bank_acc_name);
-    formPayload.append("ifsc_code", formData.ifsc_code);
-    if (formData.upload_aadhar)
-      formPayload.append("upload_aadhar", formData.upload_aadhar);
-    if (formData.upload_pancard)
-      formPayload.append("upload_pancard", formData.upload_pancard);
-    if (formData.upload_photo)
-      formPayload.append("upload_photo", formData.upload_photo);
+    if (!validateForm()) return;
+    const fd = new FormData();
+    fd.append("aadhar_no", form.aadhar_no);
+    fd.append("pancard_no", form.pancard_no);
+    fd.append("bank_acc_no", form.bank_acc_no);
+    fd.append("bank_acc_name", form.bank_acc_name);
+    fd.append("ifsc_code", form.ifsc_code);
+    if (form.upload_aadhar) fd.append("upload_aadhar", form.upload_aadhar);
+    if (form.upload_pancard) fd.append("upload_pancard", form.upload_pancard);
+    if (form.upload_photo) fd.append("upload_photo", form.upload_photo);
 
     try {
+      let res;
       if (kycData?.id) {
-        formPayload.append("_method", "PUT");
-        await dispatch(updateKyc({ id: kycData.id, formData: formPayload }));
+        fd.append("_method", "PUT");
+        res = await dispatch(updateKyc({ id: kycData.id, formData: fd }));
       } else {
-        await dispatch(submitKyc(formPayload));
+        res = await dispatch(submitKyc(fd));
       }
-
+      // store API response for debug/display
+      setApiResponse(JSON.stringify(res?.payload ?? res, null, 2));
+      // refresh server data
       await dispatch(fetchKyc());
       setEditMode(false);
-      setErrors({});
-      setTouched({});
     } catch (err) {
-      console.error("Error saving KYC:", err);
+      setApiResponse(String(err));
+      console.error(err);
     }
   };
 
+  // Simple loading / empty states kept visually similar
   if (loading && !kycData) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -222,7 +222,6 @@ const Kyc = () => {
     );
   }
 
-  // Show empty state only if no KYC data AND form is not shown
   if (!kycData?.id && !showForm) {
     return (
       <div className="max-w-5xl mx-auto my-8 bg-gradient-to-br from-white to-gray-50 p-8 rounded-2xl shadow-lg border border-gray-100">
@@ -252,7 +251,7 @@ const Kyc = () => {
           <div className="mt-6">
             <button
               onClick={() => setShowForm(true)}
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
             >
               Add KYC Information
             </button>
@@ -262,9 +261,8 @@ const Kyc = () => {
     );
   }
 
-  // If KYC data exists or form is shown, display the form
   return (
-    <div className="max-w-5xl mx-auto my-8 bg-gradient-to-br from-white to-gray-50 p-8 rounded-2xl shadow-lg border border-gray-100">
+    <div className="max-w-5xl mx-auto my-8 bg-gradient-to-br from-white to-gray-50 p-2  mb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">KYC Verification</h1>
@@ -274,12 +272,11 @@ const Kyc = () => {
               : "Please complete your KYC information"}
           </p>
         </div>
-
         {!editMode && kycData?.id && (
           <button
             onClick={() => setEditMode(true)}
             disabled={loading}
-            className="mt-4 md:mt-0 flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
+            className="mt-4 md:mt-0 flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg shadow-md"
           >
             <svg
               className="w-5 h-5 mr-2"
@@ -299,243 +296,125 @@ const Kyc = () => {
         )}
       </div>
 
-      {/* Status Messages */}
       <div className="mb-8 space-y-4">
         {success && (
-          <div className="p-4 bg-green-50 border-l-4 border-green-500 rounded-r">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 text-green-500">
-                <svg
-                  className="h-5 w-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-green-800">
-                  Your KYC information has been successfully saved!
-                </p>
-              </div>
-            </div>
-          </div>
+          <MessageBox type="success">
+            Your KYC information has been successfully saved!
+          </MessageBox>
         )}
-
-        {error && (
-          <div className="p-4 bg-red-50 border-l-4 border-red-500 rounded-r">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 text-red-500">
-                <svg
-                  className="h-5 w-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-red-800">{error}</p>
-              </div>
-            </div>
-          </div>
-        )}
+        {error && <MessageBox type="error">{error}</MessageBox>}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Personal Identification Section */}
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h3 className="text-xl font-semibold text-gray-800 mb-6 pb-2 border-b border-gray-100">
               <span className="bg-blue-100 text-blue-600 p-2 rounded-full mr-2">
                 1
-              </span>
+              </span>{" "}
               Personal Identification
             </h3>
-
             <div className="space-y-6">
               <TextInput
                 label="Aadhar Number"
                 name="aadhar_no"
-                value={formData.aadhar_no}
-                onChange={handleInputChange}
+                value={form.aadhar_no}
+                onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={!editMode}
                 inputRef={aadharRef}
                 error={errors.aadhar_no}
                 touched={touched.aadhar_no}
-                icon={
-                  <svg
-                    className="w-5 h-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                }
               />
-
               <FileInput
                 label="Upload Aadhar Card"
                 name="upload_aadhar"
-                onChange={handleFileChange}
+                onChange={handleFile}
                 disabled={!editMode}
                 error={errors.upload_aadhar}
                 touched={touched.upload_aadhar}
                 existingFile={kycData?.upload_aadhar}
+                preview={previews.upload_aadhar}
               />
-
-              {kycData?.upload_aadhar && (
-                <ImagePreview
-                  label="Aadhar Card Preview"
-                  src={`${imageUrl}/uploads/aadhar/${kycData.upload_aadhar}`}
-                />
-              )}
-
+              <PreviewCard
+                label="Aadhar"
+                local={previews.upload_aadhar}
+                server={
+                  kycData?.upload_aadhar
+                    ? `${imageUrl}/uploads/aadhar/${kycData.upload_aadhar}`
+                    : null
+                }
+              />
               <TextInput
                 label="PAN Number"
                 name="pancard_no"
-                value={formData.pancard_no}
-                onChange={handleInputChange}
+                value={form.pancard_no}
+                onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={!editMode}
                 error={errors.pancard_no}
                 touched={touched.pancard_no}
-                icon={
-                  <svg
-                    className="w-5 h-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                }
               />
-
               <FileInput
                 label="Upload PAN Card"
                 name="upload_pancard"
-                onChange={handleFileChange}
+                onChange={handleFile}
                 disabled={!editMode}
                 error={errors.upload_pancard}
                 touched={touched.upload_pancard}
                 existingFile={kycData?.upload_pancard}
+                preview={previews.upload_pancard}
               />
-
-              {kycData?.upload_pancard && (
-                <ImagePreview
-                  label="PAN Card Preview"
-                  src={`${imageUrl}/uploads/pancard/${kycData.upload_pancard}`}
-                />
-              )}
+              <PreviewCard
+                label="PAN"
+                local={previews.upload_pancard}
+                server={
+                  kycData?.upload_pancard
+                    ? `${imageUrl}/uploads/pancard/${kycData.upload_pancard}`
+                    : null
+                }
+              />
             </div>
           </div>
 
-          {/* Bank & Photo Section */}
           <div className="space-y-8">
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
               <h3 className="text-xl font-semibold text-gray-800 mb-6 pb-2 border-b border-gray-100">
                 <span className="bg-blue-100 text-blue-600 p-2 rounded-full mr-2">
                   2
-                </span>
+                </span>{" "}
                 Bank Details
               </h3>
-
               <div className="space-y-6">
                 <TextInput
                   label="Account Number"
                   name="bank_acc_no"
-                  value={formData.bank_acc_no}
-                  onChange={handleInputChange}
+                  value={form.bank_acc_no}
+                  onChange={handleChange}
                   onBlur={handleBlur}
                   disabled={!editMode}
                   error={errors.bank_acc_no}
                   touched={touched.bank_acc_no}
-                  icon={
-                    <svg
-                      className="w-5 h-5 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"
-                      />
-                    </svg>
-                  }
                 />
-
                 <TextInput
                   label="Account Holder Name"
                   name="bank_acc_name"
-                  value={formData.bank_acc_name}
-                  onChange={handleInputChange}
+                  value={form.bank_acc_name}
+                  onChange={handleChange}
                   onBlur={handleBlur}
                   disabled={!editMode}
                   error={errors.bank_acc_name}
                   touched={touched.bank_acc_name}
-                  icon={
-                    <svg
-                      className="w-5 h-5 text-gray-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  }
                 />
-
                 <TextInput
                   label="IFSC Code"
                   name="ifsc_code"
-                  value={formData.ifsc_code}
-                  onChange={handleInputChange}
+                  value={form.ifsc_code}
+                  onChange={handleChange}
                   onBlur={handleBlur}
                   disabled={!editMode}
                   error={errors.ifsc_code}
                   touched={touched.ifsc_code}
-                  icon={
-                    <svg
-                      className="w-5 h-5 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                      />
-                    </svg>
-                  }
                 />
               </div>
             </div>
@@ -544,27 +423,29 @@ const Kyc = () => {
               <h3 className="text-xl font-semibold text-gray-800 mb-6 pb-2 border-b border-gray-100">
                 <span className="bg-blue-100 text-blue-600 p-2 rounded-full mr-2">
                   3
-                </span>
+                </span>{" "}
                 Photograph
               </h3>
-
               <div className="space-y-6">
                 <FileInput
                   label="Upload Your Photo"
                   name="upload_photo"
-                  onChange={handleFileChange}
+                  onChange={handleFile}
                   disabled={!editMode}
                   error={errors.upload_photo}
                   touched={touched.upload_photo}
                   existingFile={kycData?.upload_photo}
+                  preview={previews.upload_photo}
                 />
-
-                {kycData?.upload_photo && (
-                  <ImagePreview
-                    label="Your Photo Preview"
-                    src={`${imageUrl}/uploads/upload_photo/${kycData.upload_photo}`}
-                  />
-                )}
+                <PreviewCard
+                  label="Photo"
+                  local={previews.upload_photo}
+                  server={
+                    kycData?.upload_photo
+                      ? `${imageUrl}/uploads/upload_photo/${kycData.upload_photo}`
+                      : null
+                  }
+                />
               </div>
             </div>
           </div>
@@ -576,61 +457,82 @@ const Kyc = () => {
               type="button"
               onClick={() => {
                 setEditMode(false);
-                if (!kycData?.id) {
-                  setShowForm(false);
-                }
+                if (!kycData?.id) setShowForm(false);
               }}
-              className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors duration-200"
+              className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className={`px-6 py-3 font-medium rounded-lg shadow-md transition-all duration-200 ${
+              className={`px-6 py-3 font-medium rounded-lg shadow-md ${
                 loading
                   ? "bg-blue-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:shadow-lg"
+                  : "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
               }`}
             >
-              {loading ? (
-                <span className="flex items-center justify-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Processing...
-                </span>
-              ) : kycData?.id ? (
-                "Update KYC"
-              ) : (
-                "Submit KYC"
-              )}
+              {loading
+                ? "Processing..."
+                : kycData?.id
+                ? "Update KYC"
+                : "Submit KYC"}
             </button>
           </div>
         )}
       </form>
+
+      {/* Image previews from server or local files */}
+      {/* <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <PreviewCard
+          label="Aadhar"
+          local={previews.upload_aadhar}
+          server={
+            kycData?.upload_aadhar
+              ? `${imageUrl}/uploads/aadhar/${kycData.upload_aadhar}`
+              : null
+          }
+        />
+        <PreviewCard
+          label="PAN"
+          local={previews.upload_pancard}
+          server={
+            kycData?.upload_pancard
+              ? `${imageUrl}/uploads/pancard/${kycData.upload_pancard}`
+              : null
+          }
+        />
+        <PreviewCard
+          label="Photo"
+          local={previews.upload_photo}
+          server={
+            kycData?.upload_photo
+              ? `${imageUrl}/uploads/upload_photo/${kycData.upload_photo}`
+              : null
+          }
+        />
+      </div> */}
     </div>
   );
 };
 
-// Enhanced Text Input with Icon and Error
+// Small helper components
+const MessageBox = ({ children, type = "success" }) => (
+  <div
+    className={`p-4 ${
+      type === "success"
+        ? "bg-green-50 border-l-4 border-green-500 text-green-800"
+        : "bg-red-50 border-l-4 border-red-500 text-red-800"
+    } rounded-r`}
+  >
+    <div className="flex items-center">
+      <div className="ml-3">
+        <p className="text-sm font-medium">{children}</p>
+      </div>
+    </div>
+  </div>
+);
+
 const TextInput = ({
   label,
   name,
@@ -641,39 +543,30 @@ const TextInput = ({
   inputRef,
   error,
   touched,
-  icon,
 }) => (
   <div>
     <label className="block text-sm font-medium text-gray-700 mb-1">
       {label}
     </label>
-    <div className="relative rounded-md shadow-sm">
-      {icon && (
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          {icon}
-        </div>
-      )}
-      <input
-        type="text"
-        name={name}
-        value={value}
-        onChange={onChange}
-        onBlur={onBlur}
-        placeholder={`Enter ${label}`}
-        disabled={disabled}
-        ref={inputRef}
-        className={`block w-full ${icon ? "pl-10" : "pl-4"} pr-4 py-3 border ${
-          disabled ? "bg-gray-50 text-gray-500" : "bg-white text-gray-700"
-        } rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-500 ${
-          touched && error ? "border-red-300" : "border-gray-300"
-        }`}
-      />
-    </div>
+    <input
+      type="text"
+      name={name}
+      value={value}
+      onChange={onChange}
+      onBlur={onBlur}
+      disabled={disabled}
+      ref={inputRef}
+      placeholder={`Enter ${label}`}
+      className={`block w-full pr-4 py-3 border ${
+        disabled ? "bg-gray-50 text-gray-500" : "bg-white text-gray-700"
+      } rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-500 ${
+        touched && error ? "border-red-300" : "border-gray-300"
+      }`}
+    />
     {touched && error && <p className="mt-1 text-sm text-red-600">{error}</p>}
   </div>
 );
 
-// Enhanced File Input with Error
 const FileInput = ({
   label,
   name,
@@ -682,6 +575,7 @@ const FileInput = ({
   error,
   touched,
   existingFile,
+  preview,
 }) => (
   <div>
     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -692,9 +586,7 @@ const FileInput = ({
         disabled
           ? "bg-gray-50 border-gray-200 text-gray-400"
           : "bg-white hover:border-blue-400 hover:bg-blue-50"
-      } transition-colors duration-200 ${
-        touched && error ? "border-red-300" : "border-gray-300"
-      }`}
+      } ${touched && error ? "border-red-300" : "border-gray-300"}`}
     >
       <div className="flex flex-col items-center justify-center">
         <svg
@@ -715,7 +607,7 @@ const FileInput = ({
           drag and drop
         </p>
         <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 2MB</p>
-        {existingFile && !disabled && (
+        {existingFile && !preview && (
           <p className="text-xs text-green-600 mt-1">
             Current file: {existingFile}
           </p>
@@ -734,42 +626,45 @@ const FileInput = ({
   </div>
 );
 
-// Enhanced Image Preview
-const ImagePreview = ({ label, src }) => (
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-1">
-      {label}
-    </label>
-    <div className="relative group">
-      <img
-        src={src}
-        alt={label}
-        className="w-full h-32 object-contain border border-gray-200 rounded-lg bg-gray-50 p-2"
-      />
-      <a
-        href={src}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 opacity-0 group-hover:opacity-100 rounded-lg"
-      >
-        <span className="bg-white p-2 rounded-full shadow-md">
-          <svg
-            className="w-6 h-6 text-blue-600"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
-            />
-          </svg>
-        </span>
-      </a>
+const PreviewCard = ({ label, local, server }) => {
+  const src = local || server;
+  if (!src) return null;
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label} Preview
+      </label>
+      <div className="relative group">
+        <img
+          src={src}
+          alt={label}
+          className="w-full h-32 object-contain border border-gray-200 rounded-lg bg-gray-50 p-2"
+        />
+        <a
+          href={src}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 opacity-0 group-hover:opacity-100 rounded-lg"
+        >
+          <span className="bg-white p-2 rounded-full shadow-md">
+            <svg
+              className="w-6 h-6 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </span>
+        </a>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default Kyc;

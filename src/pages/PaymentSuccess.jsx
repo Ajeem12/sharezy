@@ -38,8 +38,10 @@ const PaymentSuccess = () => {
 
   const isSuccess = payment.state === "COMPLETED";
 
+  const payAmount = (payment?.amount / 100).toFixed(2);
+
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 mb-20">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -89,7 +91,7 @@ const PaymentSuccess = () => {
               </span>
             </li>
             <li>
-              <strong>Amount:</strong> ₹{payment.amount}
+              <strong>Amount:</strong> ₹{payAmount}
             </li>
             {paymentDetails && (
               <>

@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import HeroSection from '../components/HeroSection'
-import HowItWorks from '../components/HowItWorks'
-import HelpCenter from '../components/HelpCenter'
-import PopularRides from '../components/PopularRides'
-import CheapestJourneyHero from '../components/CheapestJourneyHero'
-import ScamSafetyPage from '../components/ScamSafetyPage'
-import Testimonials from '../components/Testimonials'
-import CTASection from '../components/Cta'
-import SharezyLoader from '../components/SharezyLoader';
+import React, { useEffect, useState } from "react";
+import HeroSection from "../components/HeroSection";
+import HowItWorks from "../components/HowItWorks";
+import HelpCenter from "../components/HelpCenter";
+import PopularRides from "../components/PopularRides";
+import CheapestJourneyHero from "../components/CheapestJourneyHero";
+import ScamSafetyPage from "../components/ScamSafetyPage";
+import Testimonials from "../components/Testimonials";
+import CTASection from "../components/Cta";
+import SharezyLoader from "../components/SharezyLoader";
 
 const Home = () => {
-    const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-     useEffect(() => {
+  useEffect(() => {
     // Simulate loading time for UX (e.g. fetching data, animations, etc.)
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -21,7 +21,7 @@ const Home = () => {
     return () => clearTimeout(timer); // Cleanup
   }, []);
 
-   if (isLoading) {
+  if (isLoading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-white z-30">
         <SharezyLoader />
@@ -31,16 +31,20 @@ const Home = () => {
 
   return (
     <>
-  <HeroSection/>
-  <HowItWorks/>
-  <PopularRides/>
-  <CheapestJourneyHero/>
-  <ScamSafetyPage/>
-  <Testimonials/>
-  <CTASection/>
-  <HelpCenter/>
-   </>
-  )
-}
+      <HeroSection />
+      <HowItWorks />
+      <PopularRides />
+      <CheapestJourneyHero />
+      <ScamSafetyPage />
+      <Testimonials />
+      <CTASection />
+      <HelpCenter />
+      <br />
+      <br />
+      <br />
+      <br />
+    </>
+  );
+};
 
-export default Home
+export default Home;
