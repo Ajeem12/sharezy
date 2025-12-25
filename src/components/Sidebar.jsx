@@ -139,7 +139,7 @@ const Sidebar = () => {
                         </div>
                         <div className="relative flex items-center justify-center">
                           <span className="text-sm font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded-md shadow-sm">
-                            ₹ {totalBalance || 100}
+                            ₹ {totalBalance || 0}
                           </span>
                           <span className="absolute inline-flex h-full w-full rounded-md bg-blue-400 opacity-10 animate-ping"></span>
                         </div>

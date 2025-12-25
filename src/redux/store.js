@@ -27,6 +27,7 @@ import adminKycListReducer from "./features/admin/adminKycListSlice";
 import kycStatusReducer from "./features/admin/kycStatusSlice";
 import paymentStatusReducer from "./features/paymentStatusSlice";
 import walletReducer from "./features/profile/walletSlice";
+import adminReducer from "./features/admin/adminKycListSlice";
 
 const store = configureStore({
   reducer: {
@@ -57,6 +58,7 @@ const store = configureStore({
     kycStatusSlice: kycStatusReducer,
     paymentStatus: paymentStatusReducer,
     wallet: walletReducer,
+    admin: adminReducer,
   },
 });
 
