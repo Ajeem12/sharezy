@@ -8,11 +8,11 @@ import { Provider } from "react-redux";
 import store from "./redux/store.js"; // your redux store
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <Provider store={store}>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </Provider>
-  </StrictMode>
+  // <StrictMode>
+  <Provider store={store}>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </Provider>
+  // </StrictMode>
 );

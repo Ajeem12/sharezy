@@ -61,14 +61,14 @@ export const startRide = createAsyncThunk(
     }
   }
 );
+
 export const verifyOtpBooking = createAsyncThunk(
   "usersRides/verifyOtpBooking",
-  async ({ bookingId, otp }, thunkAPI) => {
+  async ({ array, rideId }, thunkAPI) => {
     try {
-      const response = await axiosClient.post(
-        `/verify_otp_booking/${bookingId}`,
-        { otp }
-      );
+      const response = await axiosClient.post(`/verify_otp_booking/${rideId}`, {
+        array_var: array,
+      });
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || error.message);

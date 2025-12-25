@@ -13,6 +13,7 @@ import {
   FiPhone,
   FiNavigation,
 } from "react-icons/fi";
+import { TbPasswordMobilePhone } from "react-icons/tb";
 import { FaCar } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
@@ -112,7 +113,6 @@ const MyBookings = () => {
   };
 
   const sortedBookings = [...(bookings || [])].sort((a, b) => b.id - a.id);
-  console.log("sortedBookings", sortedBookings);
 
   const filteredBookings =
     sortedBookings.filter((booking) =>
@@ -121,10 +121,11 @@ const MyBookings = () => {
         : booking.booking_status === 2
     ) || [];
 
+  console.log("filteredBookings", filteredBookings);
+
   // Before return
 
   const activeBookings = sortedBookings.filter((b) => b.booking_status === 1);
-  console.log("activeBookings", activeBookings);
 
   const cancelledBookings = sortedBookings.filter(
     (b) => b.booking_status === 2
@@ -300,6 +301,16 @@ const MyBookings = () => {
                             <FiNavigation className="text-gray-400 flex-shrink-0" />
                             <span>{ride.vehicle_no || "N/A"}</span>
                           </div>
+
+                          {booking.otp && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <TbPasswordMobilePhone className="text-gray-400 flex-shrink-0" />
+                              OTP:
+                              <span className="bg-blue-100 px-1 py-1 rounded">
+                                {booking.otp || "N/A"}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
 
