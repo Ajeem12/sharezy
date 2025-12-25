@@ -18,22 +18,38 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchUserWisePublishRides } from "../../redux/features/admin/userWisePublishRidesSlice";
 import SharezyLoader from "../../components/SharezyLoader";
 import { Link } from "react-router-dom";
+import {
+  getKycById,
+  fetchAdmins,
+  clearCurrentKyc,
+} from "../../redux/features/admin/adminKycListSlice";
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("booked");
   const { userId } = useParams();
   const dispatch = useDispatch();
-    const [remark, setRemark] = useState("");
+  const [remark, setRemark] = useState("");
 
   const {
     publishedRides = [],
     loading,
     error,
   } = useSelector((state) => state.userWisePublishRides);
+  const {
+    currentKyc,
+    loading: kycLoading,
+    error: kycError,
+  } = useSelector((state) => state.admin);
+  const kycData = currentKyc?.data ?? currentKyc;
+
+  const { admins } = useSelector((state) => state.admin);
 
   // Extract user info safely from first ride if exists
   const userInfo =
     publishedRides.length > 0 ? publishedRides[0].user_details : {};
+  const matchedKyc = admins?.data?.find(
+    (k) => k.login_user_id === Number(userId)
+  );
 
   // Calculate totals
   const totalPublished = publishedRides.length;
@@ -81,8 +97,17 @@ const UserProfile = () => {
   useEffect(() => {
     if (userId) {
       dispatch(fetchUserWisePublishRides(userId));
+      dispatch(fetchAdmins()); // load all KYCs once
     }
   }, [dispatch, userId]);
+
+  useEffect(() => {
+    if (matchedKyc?.id) {
+      dispatch(getKycById(matchedKyc.id));
+    } else {
+      dispatch(clearCurrentKyc()); //clear the stale Kyc
+    }
+  }, [dispatch, matchedKyc]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
@@ -110,6 +135,8 @@ const UserProfile = () => {
         return "Unknown";
     }
   };
+  console.log("KYC DATA:", kycData);
+  console.log("user id:", userId);
 
   const getStatusClass = (status) => {
     switch (status) {
@@ -123,18 +150,17 @@ const UserProfile = () => {
         return "bg-gray-100 text-gray-800";
     }
   };
-//
-  const kycData = {
-  aadhar_no: "1234 1234 338749",
-  upload_aadhar: "202507160902181752656538.jpg",
-  pancard_no: "ABCDE1234F",
-  upload_pancard: "202507160902181752656538.jpg",
-  bank_acc_no: "4556464",
-  bank_acc_name: "gfgfgfgfgfddxsres",
-  ifsc_code: "12134121",
-  upload_photo: "202507160902181752656538.jpg",
-};
-
+  //
+  //   const kycData = {
+  //   aadhar_no: "1234 1234 338749",
+  //   upload_aadhar: "202507160902181752656538.jpg",
+  //   pancard_no: "ABCDE1234F",
+  //   upload_pancard: "202507160902181752656538.jpg",
+  //   bank_acc_no: "4556464",
+  //   bank_acc_name: "gfgfgfgfgfddxsres",
+  //   ifsc_code: "12134121",
+  //   upload_photo: "202507160902181752656538.jpg",
+  // };
 
   if (loading) {
     return (
@@ -143,7 +169,6 @@ const UserProfile = () => {
       </div>
     );
   }
-
 
   if (error) {
     return (
@@ -256,116 +281,165 @@ const UserProfile = () => {
           </div>
         </div>
       </div>
-      {/*  */}<div className="max-w-6xl mx-auto bg-white shadow-lg rounded-xl p-8 mt-10 ring-1 ring-blue-200">
-  <div className="flex justify-between items-start mb-8">
-    <h2 className="text-2xl font-semibold text-gray-800 border-b pb-4 border-blue-100">KYC Details</h2>
+      {/*  */}
+      {/* ================= KYC SECTION ================= */}
+      {kycLoading ? (
+        <div className="max-w-6xl mx-auto bg-white rounded-xl p-10 mt-10 text-center">
+          <p className="text-gray-600">Loading KYC details…</p>
+        </div>
+      ) : kycError ? (
+        <div className="max-w-6xl mx-auto bg-white rounded-xl p-10 mt-10 text-center text-red-600">
+          Failed to load KYC details
+        </div>
+      ) : !kycData ? (
+        <div className="max-w-6xl mx-auto bg-white rounded-xl p-10 mt-10 text-center text-gray-500">
+          User has not submitted KYC yet
+        </div>
+      ) : (
+        <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-xl p-8 mt-10 ring-1 ring-blue-200">
+          <div className="flex justify-between items-start mb-8">
+            <h2 className="text-2xl font-semibold text-gray-800 border-b pb-4 border-blue-100">
+              KYC Details
+            </h2>
 
-    {/* Circular Photo */}
-    <div className="w-20 h-20 rounded-full overflow-hidden ring-2 ring-blue-300">
-      <img
-        src={`/uploads/${kycData.upload_photo}`}
-        alt="Photo"
-        className="w-full h-full object-cover"
-      />
-    </div>
-  </div>
-
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-    {/* Left Column */}
-    <div className="space-y-6">
-      {/* Aadhar Section */}
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Aadhar Number</label>
-          <div className="mt-1 p-2 bg-blue-50 rounded-md ring-1 ring-blue-200">
-            {kycData.aadhar_no}
+            {/* Circular Photo */}
+            <div className="w-20 h-20 rounded-full overflow-hidden ring-2 ring-blue-300">
+              <img
+                // src={`/uploads/${kycData.upload_photo}`}
+                src={`${BASE_URL}/uploads/upload_photo/${kycData.upload_photo}`}
+                alt="Photo"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Uploaded Aadhar</label>
-          <img
-            src={`/uploads/${kycData.upload_aadhar}`}
-            alt="Aadhar"
-            className="mt-2 w-full max-w-xs rounded-md ring-1 ring-blue-200"
-          />
-        </div>
-      </div>
 
-      {/* PAN Section */}
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">PAN Card Number</label>
-          <div className="mt-1 p-2 bg-blue-50 rounded-md ring-1 ring-blue-200">
-            {kycData.pancard_no}
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Uploaded PAN Card</label>
-          <img
-            src={`/uploads/${kycData.upload_pancard}`}
-            alt="PAN"
-            className="mt-2 w-full max-w-xs rounded-md ring-1 ring-blue-200"
-          />
-        </div>
-      </div>
-    </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Left Column */}
+            <div className="space-y-6">
+              {/* Aadhar Section */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Aadhar Number
+                  </label>
+                  <div className="mt-1 p-2 bg-blue-50 rounded-md ring-1 ring-blue-200">
+                    {kycData.aadhar_no}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Uploaded Aadhar
+                  </label>
+                  <img
+                    // src={`/uploads/${kycData.upload_aadhar}`}
+                    src={`${BASE_URL}/uploads/aadhar/${kycData.upload_aadhar}`}
+                    alt="Aadhar"
+                    className="mt-2 w-full max-w-xs rounded-md ring-1 ring-blue-200"
+                  />
+                </div>
+              </div>
 
-    {/* Right Column */}
-    <div className="space-y-6">
-      {/* Bank Details */}
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Bank Account Number</label>
-          <div className="mt-1 p-2 bg-blue-50 rounded-md ring-1 ring-blue-200">
-            {kycData.bank_acc_no}
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Account Holder Name</label>
-          <div className="mt-1 p-2 bg-blue-50 rounded-md ring-1 ring-blue-200">
-            {kycData.bank_acc_name}
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">IFSC Code</label>
-          <div className="mt-1 p-2 bg-blue-50 rounded-md ring-1 ring-blue-200">
-            {kycData.ifsc_code}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+              {/* PAN Section */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    PAN Card Number
+                  </label>
+                  <div className="mt-1 p-2 bg-blue-50 rounded-md ring-1 ring-blue-200">
+                    {kycData.pancard_no}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Uploaded PAN Card
+                  </label>
+                  <img
+                    // src={`/uploads/${kycData.upload_pancard}`}
+                    src={`${BASE_URL}/uploads/pancard//${kycData.upload_pancard}`}
+                    alt="PAN"
+                    className="mt-2 w-full max-w-xs rounded-md ring-1 ring-blue-200"
+                  />
+                </div>
+              </div>
+            </div>
 
-  {/* Remark and Actions */}
-  <div className="mt-8 pt-6 border-t border-blue-100">
-    <div className="mb-6">
-      <label className="block text-sm font-medium text-gray-700">Remark</label>
-      <textarea
-        rows="3"
-        value={remark}
-        onChange={(e) => setRemark(e.target.value)}
-        placeholder="Write your remark..."
-        className="mt-1 block w-full bg-blue-50 rounded-md ring-1 ring-blue-200 focus:ring-2 focus:ring-blue-500 p-3"
-      />
-    </div>
+            {/* Right Column */}
+            <div className="space-y-6">
+              {/* Bank Details */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Bank Account Number
+                  </label>
+                  <div className="mt-1 p-2 bg-blue-50 rounded-md ring-1 ring-blue-200">
+                    {kycData.bank_acc_no}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Account Holder Name
+                  </label>
+                  <div className="mt-1 p-2 bg-blue-50 rounded-md ring-1 ring-blue-200">
+                    {kycData.bank_acc_name}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    IFSC Code
+                  </label>
+                  <div className="mt-1 p-2 bg-blue-50 rounded-md ring-1 ring-blue-200">
+                    {kycData.ifsc_code}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-    <div className="flex gap-4 justify-end">
-      {/* <button className="px-6 py-2 rounded-md ring-1 ring-red-300 text-red-700 bg-white hover:bg-red-50 transition-colors">
+          {/* Remark and Actions */}
+          <div className="mt-8 pt-6 border-t border-blue-100">
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700">
+                Remark
+              </label>
+              <textarea
+                rows="3"
+                value={remark}
+                onChange={(e) => setRemark(e.target.value)}
+                placeholder="Write your remark..."
+                className="mt-1 block w-full bg-blue-50 rounded-md ring-1 ring-blue-200 focus:ring-2 focus:ring-blue-500 p-3"
+              />
+            </div>
+            <span
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                kycData.status === 1
+                  ? "bg-green-100 text-green-700"
+                  : kycData.status === 2
+                  ? "bg-red-100 text-red-700"
+                  : "bg-yellow-100 text-yellow-700"
+              }`}
+            >
+              {kycData.status === 1
+                ? "Approved"
+                : kycData.status === 2
+                ? "Rejected"
+                : "Pending"}
+            </span>
+
+            <div className="flex gap-4 justify-end">
+              {/* <button className="px-6 py-2 rounded-md ring-1 ring-red-300 text-red-700 bg-white hover:bg-red-50 transition-colors">
         Cancel
       </button> */}
-      <button className="px-6 py-2 rounded-md ring-1 ring-blue-300 text-white bg-blue-600 hover:bg-blue-700 transition-colors">
-        Confirm
-      </button>
-     <button className="px-6 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors">
-  Cancel with Remark
-</button>
-
-    </div>
-  </div>
-</div>
-
-
-      {/*  */}
+              <button className="px-6 py-2 rounded-md ring-1 ring-blue-300 text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                Confirm
+              </button>
+              <button className="px-6 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors">
+                Cancel with Remark
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ================= END KYC SECTION ================= */}
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

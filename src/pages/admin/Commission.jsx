@@ -1,14 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { secureAdminCommission, commissionUpdate, clearCommissionState } from '../../redux/features/admin/commissionSlice';
-import DataTable from 'react-data-table-component';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  secureAdminCommission,
+  commissionUpdate,
+  clearCommissionState,
+} from "../../redux/features/admin/commissionSlice";
+import DataTable from "react-data-table-component";
 
 const CommissionComponent = () => {
   const dispatch = useDispatch();
-  const { report, updateResponse, status, error } = useSelector((state) => state.commission);
+  const { report, updateResponse, status, error } = useSelector(
+    (state) => state.commission
+  );
 
-  const [reportPayload, setReportPayload] = useState({ from: '', to: '' });
-  const [updatePayload, setUpdatePayload] = useState({ commission: '' });
+  const [reportPayload, setReportPayload] = useState({ from: "", to: "" });
+  const [updatePayload, setUpdatePayload] = useState({ commission: "" });
 
   // Fetch secure report
   useEffect(() => {
@@ -30,60 +36,59 @@ const CommissionComponent = () => {
       commission: parseFloat(updatePayload.commission),
     };
     if (isNaN(payload.commission)) {
-      alert('Please enter a valid commission value');
+      alert("Please enter a valid commission value");
       return;
     }
     dispatch(commissionUpdate(payload));
   };
 
   const columns = [
-  {
-    name: 'Booking ID',
-    selector: (row) => row.booking_id,
-    sortable: true,
-  },
-  {
-    name: 'Amount',
-    selector: (row) => row.amount,
-    sortable: true,
-    right: true,
-    format: (row) => `₹${row.amount.toFixed(2)}`,
-  },
-  {
-    name: 'Commission (%)',
-    selector: (row) => row.commission_per,
-    sortable: true,
-    right: true,
-  },
-  {
-    name: 'Commission Amt',
-    selector: (row) => row.commission_amt,
-    sortable: true,
-    right: true,
-    format: (row) => `₹${row.commission_amt.toFixed(2)}`,
-  },
-  {
-    name: 'User Name',
-    selector: (row) => row.user_details?.name || '-',
-    sortable: true,
-  },
-  {
-    name: 'Email',
-    selector: (row) => row.user_details?.email || '-',
-    sortable: true,
-  },
-  {
-    name: 'Mobile',
-    selector: (row) => row.user_details?.mobile || '-',
-    sortable: true,
-  },
-  {
-    name: 'Location',
-    selector: (row) => row.user_details?.location || '-',
-    sortable: true,
-  },
-];
-
+    {
+      name: "Booking ID",
+      selector: (row) => row.booking_id,
+      sortable: true,
+    },
+    {
+      name: "Amount",
+      selector: (row) => row.amount,
+      sortable: true,
+      right: true,
+      format: (row) => `₹${row.amount.toFixed(2)}`,
+    },
+    {
+      name: "Commission (%)",
+      selector: (row) => row.commission_per,
+      sortable: true,
+      right: true,
+    },
+    {
+      name: "Commission Amt",
+      selector: (row) => row.commission_amt,
+      sortable: true,
+      right: true,
+      format: (row) => `₹${row.commission_amt.toFixed(2)}`,
+    },
+    {
+      name: "User Name",
+      selector: (row) => row.user_details?.name || "-",
+      sortable: true,
+    },
+    {
+      name: "Email",
+      selector: (row) => row.user_details?.email || "-",
+      sortable: true,
+    },
+    {
+      name: "Mobile",
+      selector: (row) => row.user_details?.mobile || "-",
+      sortable: true,
+    },
+    // {
+    //   name: 'Location',
+    //   selector: (row) => row.user_details?.location || '-',
+    //   sortable: true,
+    // },
+  ];
 
   return (
     <div className="max-w-7xl mx-auto p-1.5">
@@ -118,11 +123,11 @@ const CommissionComponent = () => {
             </label>
           </div>
 
-          {status === 'loading' ? (
+          {status === "loading" ? (
             <p className="text-center py-10 text-lg font-semibold text-blue-600 animate-pulse">
               Loading report...
             </p>
-          ) : status === 'failed' ? (
+          ) : status === "failed" ? (
             <p className="text-red-600 text-center py-10">Error: {error}</p>
           ) : report && Array.isArray(report) && report.length > 0 ? (
             <DataTable
@@ -135,11 +140,11 @@ const CommissionComponent = () => {
               responsive
             />
           ) : (
-            <p className="text-center text-gray-500 mt-10">No report data available.</p>
+            <p className="text-center text-gray-500 mt-10">
+              No report data available.
+            </p>
           )}
         </section>
-
-       
       </div>
     </div>
   );
